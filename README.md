@@ -1,3 +1,4 @@
 eDex-UI
 
-## Todo...
+=npm install=
+=npm run build=
