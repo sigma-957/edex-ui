@@ -21,7 +21,7 @@ function CpuLoad({ cores, divide, load, usage }: ICpuLoadProps) {
         { length: 2 },
         _ =>
           new SmoothieChart({
-            limitFPS: 30,
+            limitFPS: 120,
             responsive: true,
             millisPerPixel: 50,
             grid: {
@@ -48,7 +48,7 @@ function CpuLoad({ cores, divide, load, usage }: ICpuLoadProps) {
 
       const options = {
         lineWidth: 1.7,
-        strokeStyle: `#aacfd1`,
+        strokeStyle: `#cc9966`,
       };
 
       if (i < divide) {

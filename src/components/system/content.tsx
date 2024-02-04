@@ -19,6 +19,7 @@ function MainContent() {
       <MemInfo />
       <Divider />
       <Process />
+      <Divider />
     </Fragment>
   );
 }

@@ -18,7 +18,7 @@ function App() {
           'flex h-full w-full flex-col flex-nowrap',
         )}
       >
-        <div className="flex h-[62vh] w-full flex-row flex-nowrap">
+        <div className="flex h-[68vh] w-full flex flex-nowrap">
           <System />
           <Terminal />
           <Network />

@@ -13,6 +13,7 @@ function NetworkContent() {
       <NetworkTraffic />
       <Divider />
       <DiskUsage />
+      <Divider />
     </Fragment>
   );
 }

@@ -194,6 +194,42 @@ const INTERSTELLAR: IStyle = {
     cursorAccent: '#03A9F4',
   },
 };
-const THEME_LIST = [TRON, APOLLO, BLADE, CYBORG, INTERSTELLAR];
+
+const CHIEF_ENGINEER: IStyle = {
+  name: 'chief_engineer',
+  backgroundColor: {
+    main: 'bg-[#000000]',
+    secondary: 'bg-[#666699]',
+    active: 'bg-[#ff9900]',
+    hoverActive: 'hover:fg-[#ff3300]',
+  },
+  borderColor: {
+    default: 'border-[#666699]',
+    30: 'border-[#666699]/30',
+    75: 'border-[#666699]/75',
+    80: 'border-[#666699]/80',
+    top: 'border-t-[#666699]/40',
+    bottom: 'border-b-[#666699]/30',
+  },
+  textColor: {
+    main: 'text-[#666699]',
+    active: 'text-[#000000]',
+    hoverActive: 'hover:text-[#ff3300]',
+  },
+  colors: {
+    main: 'rgb(102, 102, 153)',
+    black: '#000000',
+    grey: '#221122',
+  },
+  terminal: {
+    fontFamily: 'Julia Mono',
+    cursorStyle: 'bar',
+    foreground: '#666699',
+    background: '#000000',
+    cursor: '#ff9900',
+    cursorAccent: '#ff9900',
+  },
+};
+const THEME_LIST = [CHIEF_ENGINEER, TRON, APOLLO, BLADE, CYBORG, INTERSTELLAR];
 
 export default THEME_LIST;

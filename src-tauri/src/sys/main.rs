@@ -161,7 +161,7 @@ fn extract_temperature(sys: &System) -> Temperature {
         }
     }
 
-    temperature.set_gpu(get_nvidia_gpu_temp());
+    temperature.set_gpu(get_amdgpu_gpu_temp());
     temperature
 }
 
@@ -187,6 +187,31 @@ fn get_nvidia_gpu_temp() -> f32 {
     error!("Command failed with error: {:?}", output.status);
     return 0.0;
 }
+#[cfg(target_os = "linux")]
+fn get_amdgpu_gpu_temp() -> f32 {
+    //This will likely vary from system to system, should probably
+    // read the value from e.g. radeontop or something.
+    let response = Command::new("cat")
+        .args(&["/sys/class/hwmon/hwmon0/temp1_input"])
+        .output();
+
+    if let Err(e) = response {
+        error!("Fail to run command. Error: {}", e);
+        return 0.0;
+    }
+
+    let output = response.unwrap();
+    if output.status.success() {
+        let result = str::from_utf8(&output.stdout);
+        if let Err(e) = result {
+            error!("Fail to parse terminal output to string. Error: {:?}. Output: {:?}", e, &output.stdout)
+        }
+        return result.unwrap().trim().parse().unwrap_or(0.0) / 1000.0;
+    }
+    error!("Command failed with error: {:?}", output.status);
+    return 0.0;
+}
+
 
 pub fn extract_cpu_data(sys: &System) -> Value {
     let cpus = sys.cpus();

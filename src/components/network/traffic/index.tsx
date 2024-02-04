@@ -25,7 +25,7 @@ function NetworkTraffic() {
         { length: 2 },
         (_, i) =>
           new SmoothieChart({
-            limitFPS: 40,
+            limitFPS: 120,
             responsive: true,
             millisPerPixel: 70,
             interpolation: 'linear',
@@ -54,7 +54,7 @@ function NetworkTraffic() {
 
       const options = {
         lineWidth: 1.7,
-        strokeStyle: `#aacfd1`,
+        strokeStyle: `#ff9900`,
       };
 
       charts[i].addTimeSeries(timeSeries, options);

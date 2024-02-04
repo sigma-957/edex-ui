@@ -1,29 +1,32 @@
 #![cfg_attr(
-all(not(debug_assertions), target_os = "windows"),
-windows_subsystem = "windows"
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
 )]
 
-mod sys;
 mod path;
 mod session;
+mod sys;
 
 extern crate core;
 
+use crate::path::main::{get_current_pty_cwd, scan_directory};
+use crate::sys::main::{
+    extract_cpu_data, extract_disk_usage, extract_memory, extract_network, extract_process,
+    IPInformation,
+};
+use log::{debug, error};
+use serde_json::Value;
 use std::{
+    io::{BufRead, BufReader, Write},
     sync::Arc,
     time::Duration,
-    io::{BufRead, BufReader, Write},
 };
-use serde_json::Value;
-use log::{debug, error};
-use tauri::{Manager, Runtime};
 use sysinfo::{System, SystemExt};
-use crate::sys::main::{IPInformation, extract_cpu_data, extract_disk_usage, extract_memory, extract_network, extract_process};
-use crate::path::main::{get_current_pty_cwd, scan_directory};
+use tauri::{Manager, Runtime};
 
 use tauri::{async_runtime::Mutex as AsyncMutex, State};
 
-use portable_pty::{CommandBuilder, native_pty_system, PtySize, PtyPair};
+use portable_pty::{native_pty_system, CommandBuilder, PtyPair, PtySize};
 use serde_json::json;
 use tokio::time::Instant;
 
@@ -37,9 +40,12 @@ struct RequestClientState {
 }
 
 #[tauri::command]
-async fn get_ip_information(request_client_state: State<'_, RequestClientState>) -> Result<Value, ()> {
+async fn get_ip_information(
+    request_client_state: State<'_, RequestClientState>,
+) -> Result<Value, ()> {
     let client = request_client_state.client.lock().await;
-    let resp = client.get("http://ip-api.com/json/?fields=status,countryCode,region,city,query")
+    let resp = client
+        .get("http://ip-api.com/json/?fields=status,countryCode,region,city,query")
         .send()
         .await;
 
@@ -48,8 +54,7 @@ async fn get_ip_information(request_client_state: State<'_, RequestClientState>)
         return Err(());
     }
 
-    let data = resp.unwrap().json::<IPInformation>()
-        .await;
+    let data = resp.unwrap().json::<IPInformation>().await;
 
     if let Err(e) = data {
         error!("Fail to get response data. Error: {:}", e);
@@ -65,11 +70,14 @@ async fn get_ip_information(request_client_state: State<'_, RequestClientState>)
 }
 
 #[tauri::command]
-async fn get_network_latency(request_client_state: State<'_, RequestClientState>) -> Result<u128, ()> {
+async fn get_network_latency(
+    request_client_state: State<'_, RequestClientState>,
+) -> Result<u128, ()> {
     let client = request_client_state.client.lock().await;
 
     let start_time = Instant::now();
-    let _ = client.get("https://1.1.1.1/dns-query?name=google.com")
+    let _ = client
+        .get("https://1.1.1.1/dns-query?name=google.com")
         .header("accept", "application/dns-json")
         .send()
         .await;
@@ -80,15 +88,19 @@ async fn get_network_latency(request_client_state: State<'_, RequestClientState>
 }
 
 #[tauri::command]
-async fn async_write_to_pty<R: Runtime>(app_handle: tauri::AppHandle<R>,
-                                        terminal_state: State<'_, TerminalState>,
-                                        data: &str) -> Result<(), ()> {
-    write!(terminal_state.writer.lock().await, "{}", data).map_err(|e| error!("Error on write to pty. Error: {:?}", e))
+async fn async_write_to_pty<R: Runtime>(
+    app_handle: tauri::AppHandle<R>,
+    terminal_state: State<'_, TerminalState>,
+    data: &str,
+) -> Result<(), ()> {
+    write!(terminal_state.writer.lock().await, "{}", data)
+        .map_err(|e| error!("Error on write to pty. Error: {:?}", e))
 }
 
 #[tauri::command]
 async fn async_resize_pty(rows: u16, cols: u16, state: State<'_, TerminalState>) -> Result<(), ()> {
-    state.pty_pair
+    state
+        .pty_pair
         .lock()
         .await
         .master
@@ -105,17 +117,17 @@ fn main() {
 
     let pty_pair = pty_system
         .openpty(PtySize {
-            rows: 24,
-            cols: 80,
+            rows: 30,
+            cols: 190,
             pixel_width: 0,
             pixel_height: 0,
         })
         .unwrap();
 
     #[cfg(target_os = "macos")]
-        let mut cmd = CommandBuilder::new("zsh");
+    let mut cmd = CommandBuilder::new("zsh");
     #[cfg(target_os = "linux")]
-        let mut cmd = CommandBuilder::new("bash");
+    let mut cmd = CommandBuilder::new("zsh");
 
     cmd.env("TERM", "xterm-256color");
     cmd.env("COLORTERM", "truecolor");
@@ -156,7 +168,7 @@ fn main() {
             writer: Arc::new(AsyncMutex::new(writer)),
         })
         .manage(RequestClientState {
-            client: Arc::new(AsyncMutex::new(reqwest::Client::new()))
+            client: Arc::new(AsyncMutex::new(reqwest::Client::new())),
         })
         .invoke_handler(tauri::generate_handler![
             get_ip_information,
@@ -170,7 +182,10 @@ fn main() {
             tauri::async_runtime::spawn(async move {
                 let state: State<TerminalState> = app_handle.state::<TerminalState>();
                 let pty = state.pty_pair.lock().await;
-                let pty_pid: i32 = pty.master.process_group_leader().expect("Fail to get pid for pty.");
+                let pty_pid: i32 = pty
+                    .master
+                    .process_group_leader()
+                    .expect("Fail to get pid for pty.");
 
                 let mut sys = System::new_all();
 
@@ -188,7 +203,10 @@ fn main() {
 
                     let processes = extract_process(&sys);
                     let _ = app_handle.emit_all("process", json!(&processes));
-                    let _ = app_handle.emit_all("process_short", json!(processes.iter().take(10).cloned().collect::<Vec<_>>()));
+                    let _ = app_handle.emit_all(
+                        "process_short",
+                        json!(processes.iter().take(10).cloned().collect::<Vec<_>>()),
+                    );
 
                     // Get current pty cwd
                     let current_cwd = get_current_pty_cwd(pty_pid);

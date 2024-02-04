@@ -32,7 +32,7 @@ function FileSystem() {
     <Fragment>
       <div className="relative flex h-full max-h-[38vh] w-full flex-col justify-between sm:p-1 md:p-2 lg:p-3">
         <Banner title={'FILESYSTEM'} name={fileSystem?.path || ''} />
-        <div className="no-scrollbar relative box-border grid h-full max-h-[34vh] min-h-[25.5vh] animate-fade appearance-none auto-rows-[8.5vh] grid-cols-[repeat(auto-fill,_minmax(8.5vh,_1fr))] gap-[1vh] overflow-auto">
+        <div className="no-scrollbar relative box-border grid h-full max-h-[34vh] min-h-[25.5vh] animate-fade appearance-none auto-rows-[10.5vh] grid-cols-[repeat(auto-fill,_minmax(10.5vh,_1fr))] gap-[0.5vh] overflow-auto">
           <Suspense>
             <FileSection open={openSetting} fileSystem={fileSystem} />
           </Suspense>

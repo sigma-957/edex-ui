@@ -24,6 +24,10 @@
     --aug-border-bg: #a3c2c2;
   }
 
+  .chief_engineer {
+    --aug-border-bg: #ff9900;
+  }
+
   .interstellar {
     --aug-border-bg: #03a9f4;
   }

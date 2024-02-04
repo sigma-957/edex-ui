@@ -29,7 +29,7 @@ function DiskDisplay() {
           key={i}
           className="flex flex-col"
           style={{
-            background: `linear-gradient(to right, ${theme.colors.grey} ${disk.usage}%, transparent 80%)`,
+            background: `linear-gradient(to left, ${theme.colors.grey} ${disk.usage}%, transparent 100%)`,
           }}
         >
           <div className="flex flex-row items-center justify-between">
